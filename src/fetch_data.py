@@ -1,3 +1,5 @@
+import requests
+from bs4 import BeautifulSoup
 from urllib.parse import quote_plus
 
 def build_url(station: str, table:str, days: int = 0, url: str = "https://cdip.ucsd.edu/data_access/ndar") -> str:
@@ -10,3 +12,24 @@ def build_url(station: str, table:str, days: int = 0, url: str = "https://cdip.u
         days = "c0"
     query = f"{station} {table} {days}"
     return f"{url}?{quote_plus(query)}"
+
+def fetch_pre_text(url: str, timeout: int = 10) -> str:
+    """
+    Download the page and return the text contents of the first <pre> block.
+    Raises RunetimeError if something goes wrong.
+    """
+    # Extract station ID from the URL query string, expected like '?100+mp+1'
+    # Station is the characters between '?' and the first '+'
+    qstart = url.index('?') + 1
+    qend = url.index('+', qstart)
+    station = url[qstart:qend]
+
+    headers = {"User-Agent": "python-requests/table_download (+https://github.com/hicks017/Ocean-Metrics)"}
+    resp = requests.get(url, headers=headers, timeout=timeout)
+    resp.raise_for_status()
+    soup = BeautifulSoup(resp.text, "html.parser")
+    pre = soup.find("pre").get_text()
+    if pre is None:
+        raise RuntimeError("No <pre> block found on page; page layout may have changed.")
+    data = f'{station} {pre}'
+    return data
