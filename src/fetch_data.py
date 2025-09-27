@@ -2,7 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 from urllib.parse import quote_plus
 
-def build_url(station: str, table:str, days: int = 0, url: str = "https://cdip.ucsd.edu/data_access/ndar") -> str:
+def build_url(station: str, table:str, days: int = 0, url: str = "https://cdip.ucsd.edu/data_access", justdar: bool = False) -> str:
     """
     Build the URL with a custom query string.
     The site expects something such as '?100+mp+1'.
@@ -10,8 +10,14 @@ def build_url(station: str, table:str, days: int = 0, url: str = "https://cdip.u
     """
     if days == 0:
         days = "c0"
+    if justdar:
+        source = "justdar.cdip"
+        if days == "c0":
+            days = 1
+    else:
+        source = "ndar"
     query = f"{station} {table} {days}"
-    return f"{url}?{quote_plus(query)}"
+    return f"{url}/{source}?{quote_plus(query)}"
 
 def fetch_pre_text(url: str, timeout: int = 10) -> str:
     """

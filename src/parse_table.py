@@ -1,5 +1,6 @@
 from io import StringIO
 import pandas as pd
+import re
 
 def parse_cdip_pre_mp(pre_text: str) -> pd.DataFrame:
     """
@@ -120,3 +121,65 @@ def parse_cdip_pre_te(pre_text: str) -> pd.DataFrame:
         utc=True
     )
     return df
+
+def parse_cdip_jdar_wind(pre_text: str) -> pd.DataFrame:
+    """
+    Parse the whitespace-formatted text into a DataFrame.
+    This function expects a specific table header.
+    """
+
+    # Capture station ID
+    STATION = int(pre_text.split()[0])
+
+    # Remove headers and header descriptions
+    first_data_row = re.search(r'(?m)^20\d{2}', pre_text)
+    if not first_data_row:
+        pre_text_stripped = ''
+    pre_text_stripped = pre_text[first_data_row.start():]
+
+    # Remove leading/trailing blank lines
+    lines = [ln.strip() for ln in pre_text_stripped.splitlines() if ln.strip() != ""]
+
+    # Join lines into a single string for processing
+    txt = "\n".join(lines)
+    buffer = StringIO(txt)
+
+    # Use fixed-width format to ensure proper column alignment
+    col_specs = [
+        (0, 4), (5, 7), (8, 10), (11, 13), (14, 16),  # YEAR, MO, DY, HR, MN
+        (18, 22), (24, 28), (29, 32), (35, 40), (43, 47),  # Hs_m, Tp_sec, Dp_deg, Depth_m, Ta_sec
+        (47, 57), (57, 61), (62, 65), (65, 74), (74, 78)   # Pres_mB, Wspd_m_s, Wdir_deg, TempAir_C, TempSea_C
+    ]
+
+    col_names = [
+        "YEAR", "MO", "DY", "HR", "MN",
+        "Hs_m", "Tp_sec", "Dp_deg", "Depth_m", "Ta_sec",
+        "Pres_mB", "Wspd_m_s", "Wdir_deg",
+        "TempAir_C", "TempSea_C"
+    ]
+
+    df = pd.read_fwf(buffer, colspecs=col_specs, header=None, names=col_names)
+
+    # Convert all columns to numeric
+    df = df.apply(pd.to_numeric, errors='coerce')
+
+    # Create a single datetime column
+    df['datetime_utc'] = pd.to_datetime(
+        {
+            'year':   df['YEAR'],
+            'month':  df['MO'],
+            'day':    df['DY'],
+            'hour':   df['HR'],
+            'minute': df['MN']
+        },
+        utc=True
+    )
+
+    # Create column to indicate station
+    df['station'] = STATION
+
+    # Select columns
+    df = df[['station', 'datetime_utc', 'Wspd_m_s', 'Wdir_deg']]
+
+    # Return the latest record
+    return df.tail(1)
