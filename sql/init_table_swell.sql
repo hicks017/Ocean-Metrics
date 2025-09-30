@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS energy (
+CREATE TABLE IF NOT EXISTS swell (
     id {id_def},
     Station INTEGER NOT NULL,
     Date_utc TEXT NOT NULL,

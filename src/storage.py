@@ -24,7 +24,7 @@ def load_ddl(table_name: str) -> str:
     Reads the external SQL file for a table.
     Assumes files named init_<table>.sql under project/sql/.
     """
-    sql_file = ROOT / "sql" / f"init_{table_name}.sql"
+    sql_file = ROOT / "sql" / f"init_table_{table_name}.sql"
     if not sql_file.exists():
         raise FileNotFoundError(f"DDL not found: {sql_file}")
     return sql_file.read_text()
