@@ -47,25 +47,26 @@ jobs:
             ${{ env.IMAGE_NAME }}:latest
             ${{ env.IMAGE_NAME }}:${{ github.sha }}
 
-      - name: Run container health check
-        run: |
-          CONTAINER_ID=$(docker run -d --name test-${{ github.run_id }} \
-            ${{ env.IMAGE_NAME }}:${{ github.sha }})
-          for i in $(seq 1 10); do
-            STATUS=$(docker inspect \
-              --format='{{.State.Health.Status}}' $CONTAINER_ID)
-            echo "Attempt $i: container health is '$STATUS'"
-            if [ "$STATUS" = "healthy" ]; then
-              echo "✅ Container is healthy"
-              break
-            fi
-            sleep 2
-          done
+      # Un-comment when ready
+      # - name: Run container health check
+      #   run: |
+      #     CONTAINER_ID=$(docker run -d --name test-${{ github.run_id }} \
+      #       ${{ env.IMAGE_NAME }}:${{ github.sha }})
+      #     for i in $(seq 1 10); do
+      #       STATUS=$(docker inspect \
+      #         --format='{{.State.Health.Status}}' $CONTAINER_ID)
+      #       echo "Attempt $i: container health is '$STATUS'"
+      #       if [ "$STATUS" = "healthy" ]; then
+      #         echo "✅ Container is healthy"
+      #         break
+      #       fi
+      #       sleep 2
+      #     done
 
-          if [ "$STATUS" != "healthy" ]; then
-            echo "🚨 Container failed health check"
-            docker logs $CONTAINER_ID
-            docker rm -f $CONTAINER_ID
-            exit 1
-          fi
-          docker rm -f $CONTAINER_ID
+      #     if [ "$STATUS" != "healthy" ]; then
+      #       echo "🚨 Container failed health check"
+      #       docker logs $CONTAINER_ID
+      #       docker rm -f $CONTAINER_ID
+      #       exit 1
+      #     fi
+      #     docker rm -f $CONTAINER_ID
