@@ -5,6 +5,9 @@ charset-normalizer==3.4.3
 idna==3.10
 numpy==2.3.3
 pandas==2.3.2
+psycopg==3.2.10
+psycopg-binary==3.2.10
+psycopg-pool==3.2.6
 python-dateutil==2.9.0.post0
 pytz==2025.2
 requests==2.32.5
