@@ -1,0 +1,10 @@
+.devcontainer/
+.env
+.gitignore
+.git/
+.github/
+**/__pycache__/
+db.sqlite3
+**/*.md
+tests/
+data/
