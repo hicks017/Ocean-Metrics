@@ -36,8 +36,14 @@ def fetch_pre_text(url: str, timeout: int = 10) -> str:
     resp = requests.get(url, headers=headers, timeout=timeout)
     resp.raise_for_status()
     soup = BeautifulSoup(resp.text, "html.parser")
-    pre = soup.find("pre").get_text()
-    if pre is None:
+
+    pre_tag = soup.find("pre")
+    if pre_tag is None:
         raise RuntimeError("No <pre> block found on page; page layout may have changed.")
-    data = f'{station} {pre}'
+
+    pre_text = pre_tag.get_text()
+    if not pre_text.strip():
+        raise RuntimeError("Empty <pre> block found on page; data may not exist for the query")
+    
+    data = f'{station} {pre_text}'
     return data

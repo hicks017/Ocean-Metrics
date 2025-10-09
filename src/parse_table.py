@@ -8,6 +8,9 @@ def parse_cdip_pre_mp(pre_text: str) -> pd.DataFrame:
     This function expects the table headers from 'mp: bulk parameters from
         spectral processing'.
     """
+    if not isinstance(pre_text, str):
+        raise TypeError("pre_text must be a str")
+
     # Use fixed-width format to ensure proper column alignment
     col_specs = [
         (0, 3),   # Station
@@ -40,6 +43,9 @@ def parse_cdip_pre_9c(pre_text: str) -> pd.DataFrame:
     This function expects the table headers from '9c: 9-band combined energy
         and direction.
     """
+    if not isinstance(pre_text, str):
+        raise TypeError("pre_text must be a str")
+        
     # Use fixed-width format to ensure proper column alignment
     col_specs = [
         (0, 3),   # Station
