@@ -33,6 +33,7 @@ def init_db(conn):
     """
     Creates tables (wind, swell, temps, energy) with Date_utc,
     wraps each DDL/index in try/except, then commits once.
+    Adds UNIQUE constraint to prevent duplicate entries.
     """
     cursor = conn.cursor()
     id_def = "SERIAL PRIMARY KEY" if USE_POSTGRES else "INTEGER PRIMARY KEY AUTOINCREMENT"
@@ -42,6 +43,7 @@ def init_db(conn):
         # CREATE TABLE
         try:
             ddl = load_ddl(table).format(id_def=id_def)
+            ddl += ", UNIQUE(Date_utc, station)"  # Add UNIQUE constraint
             cursor.execute(ddl)
             logging.info(f"✔ Verified table: {table}")
         except Exception as e:
