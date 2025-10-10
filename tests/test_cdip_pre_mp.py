@@ -16,10 +16,10 @@ class TestParseCdipPreMp(unittest.TestCase):
         # (31,34)=Dp_deg, (36,40)=Ta_s
         station = "ABC"
         time_str = "20240101123045"  # 2024-01-01 12:30:45 UTC
-        hs = "1.23"    # occupies cols 21-24 (4 chars in snippet)
-        tp = "6.50"    # occupies cols 25-29 (5 chars)
-        dp = "120"     # occupies cols 31-33 (3 chars)
-        ta = "2.00"    # occupies cols 36-39 (4 chars)
+        hs = "1.11"    # occupies cols 21-24 (4 chars in snippet)
+        tp = "22.22"    # occupies cols 25-29 (5 chars)
+        dp = "333"     # occupies cols 31-33 (3 chars)
+        ta = "44.44"    # occupies cols 36-39 (4 chars)
         # Construct line by placing spaces to match the column indices used by read_fwf
         # indices: 0-2 station, 3 is space, 4-17 time (14 chars), 18-20 spaces, 21-24 Hs, 25 is space,
         # 26-29 Tp, 30 is space, 31-33 Dp, 34-35 spaces, 36-39 Ta
@@ -27,16 +27,15 @@ class TestParseCdipPreMp(unittest.TestCase):
             f"{station}"               # cols 0-2
             f" "                       # col 3
             f"{time_str}"              # cols 4-17
-            f"   "                     # cols 18-20
-            f"{hs}"                    # cols 21-24
-            f" "                       # col 25
-            f"{tp}"                    # cols 26-29
+            f"  "                      # cols 18-19
+            f"{hs}"                    # cols 20-23
+            f" "                       # col 24
+            f"{tp}"                    # cols 25-29
             f" "                       # col 30
             f"{dp}"                    # cols 31-33
-            f"  "                      # cols 34-35
+            f" "                       # cols 34-35
             f"{ta}"                    # cols 36-39
         ) + "\n"
-
         df = parse_cdip_pre_mp(line)
 
         # Basic structural assertions
