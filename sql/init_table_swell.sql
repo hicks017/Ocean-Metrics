@@ -6,5 +6,6 @@ CREATE TABLE IF NOT EXISTS swell (
     Hs_m REAL,
     Tp_s REAL,
     Dp_deg REAL,
-    Ta_s REAL
+    Ta_s REAL,
+    UNIQUE(Date_utc, Station)
 );

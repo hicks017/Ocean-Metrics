@@ -33,7 +33,6 @@ def init_db(conn):
     """
     Creates tables (wind, swell, temps, energy) with Date_utc,
     wraps each DDL/index in try/except, then commits once.
-    Adds UNIQUE constraint to prevent duplicate entries.
     """
     cursor = conn.cursor()
     id_def = "SERIAL PRIMARY KEY" if USE_POSTGRES else "INTEGER PRIMARY KEY AUTOINCREMENT"
@@ -43,7 +42,6 @@ def init_db(conn):
         # CREATE TABLE
         try:
             ddl = load_ddl(table).format(id_def=id_def)
-            ddl += ", UNIQUE(Date_utc, station)"  # Add UNIQUE constraint
             # Debugging: Log the SQL command being executed
             logging.debug(f"Executing SQL: {ddl}")
             cursor.execute(ddl)
@@ -51,12 +49,6 @@ def init_db(conn):
         except Exception as e:
             logging.error(f"✘ Error creating table {table}: {e}")
             continue  # Skip to the next table if table creation fails
-            # Fallback: Print the SQL command being executed
-            print(f"Executing SQL: {ddl}")
-
-            # Additional Debugging: Trace SQL execution
-            logging.debug(f"Executing SQL for table: {table}")
-            logging.debug(f"SQL Command: {ddl}")
 
         # CREATE INDEXES on Date_utc and Station
         for col in ["Date_utc", "station"]:
