@@ -10,3 +10,11 @@ POSTGRES_VARS = {
     "dbname":   os.getenv("PG_DB")
 }
 USE_POSTGRES = all(POSTGRES_VARS.values())
+
+# Fetch station configurations from environment variables
+STATIONS = {
+    "wind": os.getenv("WIND", "").split(","),
+    "swell": os.getenv("SWELL", "").split(","),
+    "temps": os.getenv("TEMPS", "").split(","),
+    "energy": os.getenv("ENERGY", "").split(",")
+}
