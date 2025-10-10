@@ -8,14 +8,17 @@ def parse_cdip_pre_mp(pre_text: str) -> pd.DataFrame:
     This function expects the table headers from 'mp: bulk parameters from
         spectral processing'.
     """
+    if not isinstance(pre_text, str):
+        raise TypeError("pre_text must be a str")
+
     # Use fixed-width format to ensure proper column alignment
     col_specs = [
         (0, 3),   # Station
         (4, 18),  # Time_utc
-        (21, 25), # Hs_m
+        (20, 24), # Hs_m
         (25, 30), # Tp_s
         (31, 34), # Dp_deg
-        (36, 40), # Ta_s
+        (35, 40), # Ta_s
     ]
     col_names = ["Station", "Time_utc", "Hs_m", "Tp_s", "Dp_deg", "Ta_s"]
 
@@ -40,6 +43,9 @@ def parse_cdip_pre_9c(pre_text: str) -> pd.DataFrame:
     This function expects the table headers from '9c: 9-band combined energy
         and direction.
     """
+    if not isinstance(pre_text, str):
+        raise TypeError("pre_text must be a str")
+        
     # Use fixed-width format to ensure proper column alignment
     col_specs = [
         (0, 3),   # Station
@@ -107,6 +113,9 @@ def parse_cdip_pre_te(pre_text: str) -> pd.DataFrame:
     This function expects the table headers from 'mp: bulk parameters from
         spectral processing'.
     """
+    if not isinstance(pre_text, str):
+        raise TypeError("pre_text must be a str")
+
     # Use fixed-width format to ensure proper column alignment
     col_specs = [
         (0, 3),   # Station
@@ -136,6 +145,12 @@ def parse_cdip_jdar_wind(pre_text: str) -> pd.DataFrame:
     Parse the whitespace-formatted text into a DataFrame.
     This function expects a specific table header.
     """
+    if not isinstance(pre_text, str):
+        raise TypeError("pre_text must be a str")
+
+    # Handle empty input
+    if not pre_text.strip():
+        return pd.DataFrame(columns=["station", "Date_utc", "Time_utc", "Wspd_m_s", "Wdir_deg"])
 
     # Capture station ID
     STATION = int(pre_text.split()[0])
@@ -144,7 +159,8 @@ def parse_cdip_jdar_wind(pre_text: str) -> pd.DataFrame:
     first_data_row = re.search(r'(?m)^20\d{2}', pre_text)
     if not first_data_row:
         pre_text_stripped = ''
-    pre_text_stripped = pre_text[first_data_row.start():]
+    else:
+        pre_text_stripped = pre_text[first_data_row.start():]
 
     # Remove leading/trailing blank lines
     lines = [ln.strip() for ln in pre_text_stripped.splitlines() if ln.strip() != ""]

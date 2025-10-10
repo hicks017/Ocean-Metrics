@@ -8,6 +8,8 @@ def build_url(station: str, table:str, days: int = 0, url: str = "https://cdip.u
     The site expects something such as '?100+mp+1'.
     Days = 0 will fetch most recent record.
     """
+    base = url.rstrip("/")
+
     if days == 0:
         days = "c0"
     if justdar:
@@ -17,7 +19,7 @@ def build_url(station: str, table:str, days: int = 0, url: str = "https://cdip.u
     else:
         source = "ndar"
     query = f"{station} {table} {days}"
-    return f"{url}/{source}?{quote_plus(query)}"
+    return f"{base}/{source}?{quote_plus(query)}"
 
 def fetch_pre_text(url: str, timeout: int = 10) -> str:
     """
@@ -34,8 +36,14 @@ def fetch_pre_text(url: str, timeout: int = 10) -> str:
     resp = requests.get(url, headers=headers, timeout=timeout)
     resp.raise_for_status()
     soup = BeautifulSoup(resp.text, "html.parser")
-    pre = soup.find("pre").get_text()
-    if pre is None:
+
+    pre_tag = soup.find("pre")
+    if pre_tag is None:
         raise RuntimeError("No <pre> block found on page; page layout may have changed.")
-    data = f'{station} {pre}'
+
+    pre_text = pre_tag.get_text()
+    if not pre_text.strip():
+        raise RuntimeError("Empty <pre> block found on page; data may not exist for the query")
+    
+    data = f'{station} {pre_text}'
     return data

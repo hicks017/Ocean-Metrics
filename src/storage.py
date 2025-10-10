@@ -46,6 +46,7 @@ def init_db(conn):
             logging.info(f"✔ Verified table: {table}")
         except Exception as e:
             logging.error(f"✘ Error creating table {table}: {e}")
+            continue  # Skip to the next table if table creation fails
 
         # CREATE INDEXES on Date_utc and Station
         for col in ["Date_utc", "station"]:
@@ -57,7 +58,11 @@ def init_db(conn):
             except Exception as e:
                 logging.error(f"✘ Error creating index {idx}: {e}")
 
-    conn.commit()
+    try:
+        conn.commit()
+    except Exception as commit_error:
+        logging.error(f"✘ Error during commit: {commit_error}")
+        raise
 
 # def main():
 #     """

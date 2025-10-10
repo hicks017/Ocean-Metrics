@@ -1,0 +1,72 @@
+name: CI - Docker Build
+
+on:
+  push:
+    branches: [ main, 'feature/**' ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  IMAGE_NAME: ghcr.io/hicks017/ocean-metrics
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: Dockerfile
+          push: false
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+      - name: Push Docker image (main only)
+        if: github.ref == 'refs/heads/main'
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: Dockerfile
+          push: true
+          tags: |
+            ${{ env.IMAGE_NAME }}:latest
+            ${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+      # Un-comment when ready
+      # - name: Run container health check
+      #   run: |
+      #     CONTAINER_ID=$(docker run -d --name test-${{ github.run_id }} \
+      #       ${{ env.IMAGE_NAME }}:${{ github.sha }})
+      #     for i in $(seq 1 10); do
+      #       STATUS=$(docker inspect \
+      #         --format='{{.State.Health.Status}}' $CONTAINER_ID)
+      #       echo "Attempt $i: container health is '$STATUS'"
+      #       if [ "$STATUS" = "healthy" ]; then
+      #         echo "✅ Container is healthy"
+      #         break
+      #       fi
+      #       sleep 2
+      #     done
+
+      #     if [ "$STATUS" != "healthy" ]; then
+      #       echo "🚨 Container failed health check"
+      #       docker logs $CONTAINER_ID
+      #       docker rm -f $CONTAINER_ID
+      #       exit 1
+      #     fi
+      #     docker rm -f $CONTAINER_ID
