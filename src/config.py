@@ -11,7 +11,7 @@ POSTGRES_VARS = {
 }
 USE_POSTGRES = all(POSTGRES_VARS.values())
 
-# Fetch station configurations from environment variables
+# Fetch stations
 STATIONS = {
     "wind": os.getenv("WIND", "").split(","),
     "swell": os.getenv("SWELL", "").split(","),
