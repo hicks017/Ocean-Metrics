@@ -1,6 +1,8 @@
 import os
 
 # Configuration ------------------------------------------------------------------------
+
+# Database settings with no defaults
 SQLITE_FILE = "data/data.sqlite3"
 POSTGRES_VARS = {
     "host":     os.getenv("PG_HOST"),
@@ -11,10 +13,10 @@ POSTGRES_VARS = {
 }
 USE_POSTGRES = all(POSTGRES_VARS.values())
 
-# Fetch stations
+# Fetch stations, use defaults if none are provided
 STATIONS = {
-    "wind": os.getenv("WIND", "").split(","),
-    "swell": os.getenv("SWELL", "").split(","),
-    "temps": os.getenv("TEMPS", "").split(","),
-    "energy": os.getenv("ENERGY", "").split(",")
+    "wind": os.getenv("WIND", "73").split(","),
+    "swell": os.getenv("SWELL", "100").split(","),
+    "temps": os.getenv("TEMPS", "100").split(","),
+    "energy": os.getenv("ENERGY", "100").split(",")
 }

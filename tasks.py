@@ -48,18 +48,18 @@ def fetch_parse_store(station, table, parse_function, table_name):
 
 def task_fetch_wind():
     for station in STATIONS["wind"]:
-        fetch_parse_store(station, "wind", parse_cdip_jdar_wind, "wind")
+        fetch_parse_store(station, "pm", parse_cdip_jdar_wind, "wind") # NOTE: need to pass justdar=True for this one to work
 
 def task_fetch_swell():
     for station in STATIONS["swell"]:
-        fetch_parse_store(station, "swell", parse_cdip_pre_mp, "swell")
+        fetch_parse_store(station, "mp", parse_cdip_pre_mp, "swell")
 
 def task_fetch_temps():
     for station in STATIONS["temps"]:
-        fetch_parse_store(station, "temps", parse_cdip_pre_te, "temps")
+        fetch_parse_store(station, "te", parse_cdip_pre_te, "temps")
 
 def task_fetch_energy():
     for station in STATIONS["energy"]:
-        fetch_parse_store(station, "energy", parse_cdip_pre_9c, "energy")
+        fetch_parse_store(station, "9c", parse_cdip_pre_9c, "energy")
 
 # Created with AI assistance
