@@ -90,9 +90,9 @@ class TestParseCdipPreMp(unittest.TestCase):
         self.assertEqual(df.loc[0, "station"].strip(), "STA")
         self.assertEqual(df.loc[1, "station"].strip(), "BBB")
         self.assertEqual(df.loc[2, "station"].strip(), "CCC")
-        # self.assertEqual(df.loc[0, "Time_utc"], pd.Timestamp("2023-01-01T00:00:00Z"))
-        # self.assertEqual(df.loc[1, "Time_utc"], pd.Timestamp("2023-01-01T12:00:00Z"))
-        # self.assertEqual(df.loc[2, "Time_utc"], pd.Timestamp("2023-01-01T23:59:59Z"))
+        self.assertEqual(df.loc[0, "Time_utc"], pd.Timestamp("2023-01-01T00:00:00Z"))
+        self.assertEqual(df.loc[1, "Time_utc"], pd.Timestamp("2023-01-01T12:00:00Z"))
+        self.assertEqual(df.loc[2, "Time_utc"], pd.Timestamp("2023-01-01T23:59:59Z"))
         # Row order preserved
         self.assertEqual(list(df["station"].str.strip()), ["STA", "BBB", "CCC"])
 

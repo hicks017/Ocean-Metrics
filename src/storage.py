@@ -1,7 +1,8 @@
 import logging
-import sqlite3
-import psycopg
 from pathlib import Path
+from sqlalchemy import create_engine, text
+from sqlalchemy.engine import Engine
+from sqlalchemy.pool import NullPool
 
 from src.config import SQLITE_FILE, POSTGRES_VARS, USE_POSTGRES
 
@@ -10,14 +11,14 @@ ROOT = Path(__file__).resolve().parent.parent
 # Configure simple console logging
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
-def get_connection():
+def get_connection() -> Engine:
     """
-    Returns a DB connection to Postgres or SQLite.
-    Supports use in 'with' for automatic close().
+    Returns a SQLAlchemy Engine for either Postgres or SQLite.
     """
     if USE_POSTGRES:
-        return psycopg.connect(**POSTGRES_VARS)
-    return sqlite3.connect(SQLITE_FILE)
+        url = f"postgresql://{POSTGRES_VARS['user']}:{POSTGRES_VARS['password']}@{POSTGRES_VARS['host']}:{POSTGRES_VARS['port']}/{POSTGRES_VARS['dbname']}"
+        return create_engine(url, poolclass=NullPool, isolation_level='AUTOCOMMIT')
+    return create_engine(f'sqlite:///{SQLITE_FILE}', poolclass=NullPool)
 
 def load_ddl(table_name: str) -> str:
     """
@@ -29,42 +30,36 @@ def load_ddl(table_name: str) -> str:
         raise FileNotFoundError(f"DDL not found: {sql_file}")
     return sql_file.read_text()
 
-def init_db(conn):
+def init_db(engine: Engine):
     """
     Creates tables (wind, swell, temps, energy) with Date_utc,
-    wraps each DDL/index in try/except, then commits once.
+    wraps each DDL/index in try/except.
     """
-    cursor = conn.cursor()
     id_def = "SERIAL PRIMARY KEY" if USE_POSTGRES else "INTEGER PRIMARY KEY AUTOINCREMENT"
     tables = ["wind", "swell", "temps", "energy"]
 
-    for table in tables:
-        # CREATE TABLE
-        try:
-            ddl = load_ddl(table).format(id_def=id_def)
-            # Debugging: Log the SQL command being executed
-            logging.debug(f"Executing SQL: {ddl}")
-            cursor.execute(ddl)
-            logging.info(f"✅ Verified table: {table}")
-        except Exception as e:
-            logging.error(f"❌ Error creating table {table}: {e}")
-            continue  # Skip to the next table if table creation fails
-
-        # CREATE INDEXES on Date_utc and Station
-        for col in ["Date_utc", "station"]:
-            idx = f"idx_{table}_{col.lower()}"
-            sql = f"CREATE INDEX IF NOT EXISTS {idx} ON {table}({col});"
+    with engine.begin() as conn:  # begin a transaction
+        for table in tables:
+            # CREATE TABLE
             try:
-                cursor.execute(sql)
-                logging.info(f"✅ Verified index: {idx}")
+                ddl = load_ddl(table).format(id_def=id_def)
+                # Debugging: Log the SQL command being executed
+                logging.debug(f"Executing SQL: {ddl}")
+                conn.execute(text(ddl))
+                logging.info(f"✅ Verified table: {table}")
             except Exception as e:
-                logging.error(f"❌ Error creating index {idx}: {e}")
+                logging.error(f"❌ Error creating table {table}: {e}")
+                continue  # Skip to the next table if table creation fails
 
-    try:
-        conn.commit()
-    except Exception as commit_error:
-        logging.error(f"❌ Error during commit: {commit_error}")
-        raise
+            # CREATE INDEXES on Date_utc and Station
+            for col in ["Date_utc", "station"]:
+                idx = f"idx_{table}_{col.lower()}"
+                sql = f"CREATE INDEX IF NOT EXISTS {idx} ON {table}({col});"
+                try:
+                    conn.execute(text(sql))
+                    logging.info(f"✅ Verified index: {idx}")
+                except Exception as e:
+                    logging.error(f"❌ Error creating index {idx}: {e}")
 
 # def main():
 #     """

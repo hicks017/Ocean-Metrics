@@ -6,9 +6,9 @@ logger = logging.getLogger(__name__)
 
 def main():
     logger.info("✅ Container startup -- initializing DB")
-    conn = get_connection()
+    engine = get_connection()
     try:
-        init_db(conn)
+        init_db(engine)
         logger.info("Starting the scheduler...")
         scheduler.start()
     except (KeyboardInterrupt, SystemExit):

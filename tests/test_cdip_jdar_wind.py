@@ -27,11 +27,11 @@ class TestParseCdipJdarWind(unittest.TestCase):
 
         # Time parsing: timezone-aware UTC Timestamp and correct value
         ts = df.loc[0, "Time_utc"]
-        # self.assertTrue(pd.api.types.is_datetime64_any_dtype(df["Time_utc"]))
-        # self.assertEqual(ts, pd.Timestamp("2025-10-09T01:45:00Z"))
+        self.assertTrue(pd.api.types.is_datetime64_any_dtype(df["Time_utc"]))
+        self.assertEqual(ts, pd.Timestamp("2025-10-09T01:45:00Z"))
 
         # Date_utc equals date part
-        # self.assertEqual(df.loc[0, "Date_utc"], date(2025, 10, 9))
+        self.assertEqual(df.loc[0, "Date_utc"], date(2025, 10, 9))
 
         # Wind speed and direction
         self.assertAlmostEqual(df.loc[0, "Wspd_m_s"], 2.71)

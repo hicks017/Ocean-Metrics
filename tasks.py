@@ -1,17 +1,24 @@
 import logging
+from sqlalchemy import MetaData, Table, select, func, and_
 from src.fetch_data import fetch_pre_text, build_url
 from src.parse_table import parse_cdip_pre_mp, parse_cdip_pre_te, parse_cdip_pre_9c, parse_cdip_jdar_wind
 from src.storage import get_connection
 from src.config import STATIONS, USE_POSTGRES
 
 logger = logging.getLogger(__name__)
+ALLOWED_TABLES = {"wind", "swell", "temps", "energy"}
 
 def fetch_parse_store(station, table, parse_function, table_name, justdar: bool = False, timeout: int = 10):
-    """Fetch data from URL, validate it, and store it in the database."""
+    """Fetch data from URL, validate it, and store it in the database using SQLAlchemy Core."""
     try:
+        if table_name not in ALLOWED_TABLES:
+            logger.error(f"Invalid table name: {table_name}")
+            return
+
         url = build_url(station, table, justdar=justdar)
         logger.info(f"Fetching data for {table_name} (station {station})...")
         pre_text = fetch_pre_text(url, timeout=timeout)
+
         logger.info(f"Parsing data for {table_name} (station {station})...")
         df = parse_function(pre_text)
 
@@ -20,29 +27,40 @@ def fetch_parse_store(station, table, parse_function, table_name, justdar: bool 
             return
 
         # Validate parsed data
-        required_columns = ["Date_utc", "station"]
-        if not all(col in df.columns for col in required_columns):
+        required_columns = {"Date_utc", "station"}
+        if not required_columns.issubset(df.columns):
             logger.error(f"❌ Validation failed: Missing required columns in parsed data for {table_name} (station {station}).")
             return
 
-        # Check for duplicates before inserting
-        with get_connection() as conn:
-            try:
-                placeholder = '%s' if USE_POSTGRES else '?'
-                existing_records = conn.execute(
-                    f"SELECT COUNT(*) FROM {table_name} WHERE Date_utc = {placeholder} AND station = {placeholder}",
-                    (df['Date_utc'].iloc[0], station)
-                ).fetchone()[0]
+        engine = get_connection()
+        metadata = MetaData()
 
-                if existing_records > 0:
+        # Reflect only the target table to avoid reflecting whole DB
+        table_obj = Table(table_name, metadata, autoload_with=engine)
+
+        # Check for an existing row using SQLAlchemy Core
+        count_expr = func.count()
+        check_stmt = select(count_expr).select_from(table_obj).where(
+            and_(
+                table_obj.c.Date_utc == df['Date_utc'].iloc[0],
+                table_obj.c.station == station
+            )
+        )
+
+        try:
+            with engine.connect() as conn:
+                existing_count = conn.execute(check_stmt).scalar()
+                if existing_count and existing_count > 0:
                     logger.info(f"Skipping duplicate entry for {table_name} (station {station}).")
                     return
 
                 logger.info(f"Storing data for {table_name} (station {station})...")
-                df.to_sql(table_name, conn, if_exists="append", index=False)
-            except Exception as db_error:
-                logger.error(f"❌ Database error while processing {table_name} (station {station}): {db_error}")
-                raise
+                # Use pandas to_sql to append rows; to_sql will use SQLAlchemy engine properly
+                df.to_sql(table_name, engine, if_exists="append", index=False)
+        except Exception as db_error:
+            logger.error(f"❌ Database error while processing {table_name} (station {station}): {db_error}")
+            raise
+
         logger.info(f"✅ Successfully processed {table_name} (station {station}).")
     except Exception as e:
         logger.error(f"❌ Error processing {table_name} (station {station}): {e}")
