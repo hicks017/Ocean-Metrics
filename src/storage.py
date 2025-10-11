@@ -45,9 +45,9 @@ def init_db(conn):
             # Debugging: Log the SQL command being executed
             logging.debug(f"Executing SQL: {ddl}")
             cursor.execute(ddl)
-            logging.info(f"✔ Verified table: {table}")
+            logging.info(f"✅ Verified table: {table}")
         except Exception as e:
-            logging.error(f"✘ Error creating table {table}: {e}")
+            logging.error(f"❌ Error creating table {table}: {e}")
             continue  # Skip to the next table if table creation fails
 
         # CREATE INDEXES on Date_utc and Station
@@ -56,14 +56,14 @@ def init_db(conn):
             sql = f"CREATE INDEX IF NOT EXISTS {idx} ON {table}({col});"
             try:
                 cursor.execute(sql)
-                logging.info(f"✔ Verified index: {idx}")
+                logging.info(f"✅ Verified index: {idx}")
             except Exception as e:
-                logging.error(f"✘ Error creating index {idx}: {e}")
+                logging.error(f"❌ Error creating index {idx}: {e}")
 
     try:
         conn.commit()
     except Exception as commit_error:
-        logging.error(f"✘ Error during commit: {commit_error}")
+        logging.error(f"❌ Error during commit: {commit_error}")
         raise
 
 # def main():

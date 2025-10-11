@@ -24,9 +24,9 @@ def safe_wrap(task_func, *, lock_db=True):
                     task_func()
             else:
                 task_func()
-            logger.info("Finished %s at %s", task_func.__name__, datetime.utcnow().isoformat())
+            logger.info("✅ Finished %s at %s", task_func.__name__, datetime.utcnow().isoformat())
         except Exception:
-            logger.exception("Error running %s", task_func.__name__)
+            logger.exception("❌ Error running %s", task_func.__name__)
     return wrapper
 
 # Force single worker (fully serialized)

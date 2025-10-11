@@ -8,7 +8,7 @@ class TestParseCdipPre9c(unittest.TestCase):
     def setUp(self):
         # Column names expected from the function
         self.expected_cols = [
-            "Station", "Date_utc", "Time_utc", "band_22s_plus_cm2", "band_22s_plus_dir",
+            "station", "Date_utc", "Time_utc", "band_22s_plus_cm2", "band_22s_plus_dir",
             "band_22_18s_cm2", "band_22_18s_dir", "band_18_16s_cm2", "band_18_16s_dir",
             "band_16_14s_cm2", "band_16_14s_dir", "band_14_12s_cm2", "band_14_12s_dir",
             "band_12_10s_cm2", "band_12_10s_dir", "band_10_8s_cm2", "band_10_8s_dir",
@@ -53,7 +53,7 @@ class TestParseCdipPre9c(unittest.TestCase):
         self.assertEqual(len(df), 1)
 
         # Station exact match
-        self.assertEqual(df.loc[0, "Station"].strip(), station)
+        self.assertEqual(df.loc[0, "station"].strip(), station)
 
         # Time parsing: timezone-aware UTC Timestamp and correct value
         ts = df.loc[0, "Time_utc"]

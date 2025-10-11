@@ -6,7 +6,7 @@ from src.parse_table import parse_cdip_pre_te
 class TestParseCdipPreTe(unittest.TestCase):
     def setUp(self):
         # Column names expected from the function
-        self.expected_cols = ["Station", "Date_utc", "Time_utc", "SST_C", "SST_F"]
+        self.expected_cols = ["station", "Date_utc", "Time_utc", "SST_C", "SST_F"]
 
     def test_single_valid_row(self):
         # Build a single line with fixed-width columns per col_specs in function
@@ -30,7 +30,7 @@ class TestParseCdipPreTe(unittest.TestCase):
         self.assertEqual(len(df), 1)
 
         # Station exact match
-        self.assertEqual(df.loc[0, "Station"].strip(), station)
+        self.assertEqual(df.loc[0, "station"].strip(), station)
 
         # Time parsing: timezone-aware UTC Timestamp and correct value
         ts = df.loc[0, "Time_utc"]
