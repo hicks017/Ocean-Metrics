@@ -20,28 +20,31 @@ def get_connection() -> Engine:
         return create_engine(url, poolclass=NullPool, isolation_level='AUTOCOMMIT')
     return create_engine(f'sqlite:///{SQLITE_FILE}', poolclass=NullPool)
 
-def load_ddl(table_name: str) -> str:
+def load_ddl(table_name: str, dialect: str) -> str:
     """
-    Reads the external SQL file for a table.
-    Assumes files named init_<table>.sql under project/sql/.
+    Reads the external SQL database for a table.
+    Assumes files named init_<table>.<dialetct>.sql under sql/.
+    dialect: 'sqlite' or 'postgres'.
     """
-    sql_file = ROOT / "sql" / f"init_table_{table_name}.sql"
+    filename = f"init_table_{table_name}.postgres.sql" if dialect == "postgres" else f"init_table_{table_name}.sqlite.sql"
+    sql_file = ROOT / "sql" / filename
     if not sql_file.exists():
         raise FileNotFoundError(f"DDL not found: {sql_file}")
     return sql_file.read_text()
 
 def init_db(engine: Engine):
     """
-    Creates tables (wind, swell, temps, energy) with Date_utc,
+    Creates tables (wind, swell, temps, energy) with date_utc,
     wraps each DDL/index in try/except.
     """
     tables = ["wind", "swell", "temps", "energy"]
+    dialect = "postgres" if USE_POSTGRES else "sqlite"
 
     with engine.begin() as conn:  # begin a transaction
         for table in tables:
             # CREATE TABLE
             try:
-                ddl = load_ddl(table).format(id_def=id_def)
+                ddl = load_ddl(table, dialect)
                 # Debugging: Log the SQL command being executed
                 logging.debug(f"Executing SQL: {ddl}")
                 conn.execute(text(ddl))
@@ -51,8 +54,8 @@ def init_db(engine: Engine):
                 continue  # Skip to the next table if table creation fails
 
             # CREATE INDEXES on Date_utc and Station
-            for col in ["Date_utc", "station"]:
-                idx = f"idx_{table}_{col.lower()}"
+            for col in ["date_utc", "station"]:
+                idx = f"idx_{table}_{col}"
                 sql = f"CREATE INDEX IF NOT EXISTS {idx} ON {table}({col});"
                 try:
                     conn.execute(text(sql))
