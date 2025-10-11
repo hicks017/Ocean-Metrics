@@ -30,11 +30,13 @@ def parse_cdip_pre_mp(pre_text: str) -> pd.DataFrame:
     df['Time_utc'] = pd.to_datetime(
         df['Time_utc'],
         format='%Y%m%d%H%M%S',
-        utc=True
+        utc=True,
+        errors='coerce'
     )
 
     # Extract date from time stamp
-    df.insert(1, 'Date_utc', df['Time_utc'].dt.date)
+    df.insert(1, 'Date_utc', df['Time_utc'].dt.strftime('%Y-%m-%d'))
+    df['Time_utc'] = df['Time_utc'].dt.strftime('%Y-%m-%dT%H:%M:%SZ')
     return df
 
 def parse_cdip_pre_9c(pre_text: str) -> pd.DataFrame:
@@ -100,11 +102,13 @@ def parse_cdip_pre_9c(pre_text: str) -> pd.DataFrame:
     df['Time_utc'] = pd.to_datetime(
         df['Time_utc'],
         format='%Y%m%d%H%M',
-        utc=True
+        utc=True,
+        errors='coerce'
     )
 
     # Extract date from time stamp
-    df.insert(1, 'Date_utc', df['Time_utc'].dt.date)
+    df.insert(1, 'Date_utc', df['Time_utc'].dt.strftime('%Y-%m-%d'))
+    df['Time_utc'] = df['Time_utc'].dt.strftime('%Y-%m-%dT%H:%M:%SZ')
     return df
 
 def parse_cdip_pre_te(pre_text: str) -> pd.DataFrame:
@@ -133,11 +137,13 @@ def parse_cdip_pre_te(pre_text: str) -> pd.DataFrame:
     df['Time_utc'] = pd.to_datetime(
         df['Time_utc'],
         format='%Y%m%d%H%M%S',
-        utc=True
+        utc=True,
+        errors='coerce'
     )
     
     # Extract date from time stamp
-    df.insert(1, 'Date_utc', df['Time_utc'].dt.date)
+    df.insert(1, 'Date_utc', df['Time_utc'].dt.strftime('%Y-%m-%d'))
+    df['Time_utc'] = df['Time_utc'].dt.strftime('%Y-%m-%dT%H:%M:%SZ')
     return df
 
 def parse_cdip_jdar_wind(pre_text: str) -> pd.DataFrame:
@@ -201,7 +207,8 @@ def parse_cdip_jdar_wind(pre_text: str) -> pd.DataFrame:
     )
     
     # Extract date from time stamp
-    df.insert(1, 'Date_utc', df['Time_utc'].dt.date)
+    df.insert(1, 'Date_utc', df['Time_utc'].dt.strftime('%Y-%m-%d'))
+    df['Time_utc'] = df['Time_utc'].dt.strftime('%Y-%m-%dT%H:%M:%SZ')
 
     # Create column to indicate station
     df['station'] = STATION
