@@ -31,7 +31,7 @@ def fetch_parse_store(station, table, parse_function, table_name, justdar: bool 
                 placeholder = '%s' if USE_POSTGRES else '?'
                 existing_records = conn.execute(
                     f"SELECT COUNT(*) FROM {table_name} WHERE Date_utc = {placeholder} AND station = {placeholder}",
-                    (val_date, station)
+                    (df['Date_utc'].iloc[0], station)
                 ).fetchone()[0]
 
                 if existing_records > 0:
