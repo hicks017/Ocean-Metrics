@@ -35,7 +35,6 @@ def init_db(engine: Engine):
     Creates tables (wind, swell, temps, energy) with Date_utc,
     wraps each DDL/index in try/except.
     """
-    id_def = "SERIAL PRIMARY KEY" if USE_POSTGRES else "INTEGER PRIMARY KEY AUTOINCREMENT"
     tables = ["wind", "swell", "temps", "energy"]
 
     with engine.begin() as conn:  # begin a transaction

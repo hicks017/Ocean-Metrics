@@ -27,7 +27,7 @@ def fetch_parse_store(station, table, parse_function, table_name, justdar: bool 
             return
 
         # Validate parsed data
-        required_columns = {"Date_utc", "station"}
+        required_columns = {"date_utc", "station"}
         if not required_columns.issubset(df.columns):
             logger.error(f"❌ Validation failed: Missing required columns in parsed data for {table_name} (station {station}).")
             return
@@ -42,7 +42,7 @@ def fetch_parse_store(station, table, parse_function, table_name, justdar: bool 
         count_expr = func.count()
         check_stmt = select(count_expr).select_from(table_obj).where(
             and_(
-                table_obj.c.Date_utc == df['Date_utc'].iloc[0],
+                table_obj.c.Date_utc == df['date_utc'].iloc[0],
                 table_obj.c.station == station
             )
         )
