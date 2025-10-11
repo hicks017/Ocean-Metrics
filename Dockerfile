@@ -14,9 +14,8 @@ RUN apt-get update \
     && pip install -r requirements.txt
 
 # Verifies that the app is running
-# Note: Commenting out until the app runs automatically
-# HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
-#   CMD pgrep -f "python main.py" > /dev/null || exit 1
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+  CMD pgrep -f "python main.py" > /dev/null || exit 1
 
 # Launch the app
 CMD ["python", "main.py"]

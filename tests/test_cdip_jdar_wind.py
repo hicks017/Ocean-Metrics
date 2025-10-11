@@ -52,3 +52,5 @@ class TestParseCdipJdarWind(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+# Created with AI assistance

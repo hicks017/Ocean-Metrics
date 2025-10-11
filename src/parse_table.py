@@ -20,7 +20,7 @@ def parse_cdip_pre_mp(pre_text: str) -> pd.DataFrame:
         (31, 34), # Dp_deg
         (35, 40), # Ta_s
     ]
-    col_names = ["Station", "Time_utc", "Hs_m", "Tp_s", "Dp_deg", "Ta_s"]
+    col_names = ["station", "Time_utc", "Hs_m", "Tp_s", "Dp_deg", "Ta_s"]
 
     # Format data frame
     buffer = StringIO(pre_text)
@@ -70,7 +70,7 @@ def parse_cdip_pre_9c(pre_text: str) -> pd.DataFrame:
         (112, 115), # band_6_2s_dir
     ]
     col_names = [
-        "Station",
+        "station",
         "Time_utc",
         "band_22s_plus_cm2",
         "band_22s_plus_dir",
@@ -123,7 +123,7 @@ def parse_cdip_pre_te(pre_text: str) -> pd.DataFrame:
         (19, 24), # SST_C
         (26, 31), # SST_F
     ]
-    col_names = ["Station", "Time_utc", "SST_C", "SST_F"]
+    col_names = ["station", "Time_utc", "SST_C", "SST_F"]
 
     # Format data frame
     buffer = StringIO(pre_text)

@@ -8,11 +8,11 @@ from src.parse_table import parse_cdip_pre_mp
 class TestParseCdipPreMp(unittest.TestCase):
     def setUp(self):
         # Column names expected from the function
-        self.expected_cols = ["Station", "Date_utc", "Time_utc", "Hs_m", "Tp_s", "Dp_deg", "Ta_s"]
+        self.expected_cols = ["station", "Date_utc", "Time_utc", "Hs_m", "Tp_s", "Dp_deg", "Ta_s"]
 
     def test_single_valid_row(self):
         # Build a single line with fixed-width columns per col_specs in function:
-        # (0,3)=Station, (4,18)=Time_utc (YYYYmmddHHMMSS), (21,25)=Hs_m, (25,30)=Tp_s,
+        # (0,3)=station, (4,18)=Time_utc (YYYYmmddHHMMSS), (21,25)=Hs_m, (25,30)=Tp_s,
         # (31,34)=Dp_deg, (36,40)=Ta_s
         station = "ABC"
         time_str = "20240101123045"  # 2024-01-01 12:30:45 UTC
@@ -43,7 +43,7 @@ class TestParseCdipPreMp(unittest.TestCase):
         self.assertEqual(len(df), 1)
 
         # Station exact match
-        self.assertEqual(df.loc[0, "Station"].strip(), station)
+        self.assertEqual(df.loc[0, "station"].strip(), station)
 
         # Time parsing: timezone-aware UTC Timestamp and correct value
         ts = df.loc[0, "Time_utc"]
@@ -87,14 +87,14 @@ class TestParseCdipPreMp(unittest.TestCase):
         self.assertListEqual(list(df.columns), self.expected_cols)
         self.assertEqual(len(df), 3)
         # Check first, middle, last timestamps and station values
-        self.assertEqual(df.loc[0, "Station"].strip(), "STA")
-        self.assertEqual(df.loc[1, "Station"].strip(), "BBB")
-        self.assertEqual(df.loc[2, "Station"].strip(), "CCC")
+        self.assertEqual(df.loc[0, "station"].strip(), "STA")
+        self.assertEqual(df.loc[1, "station"].strip(), "BBB")
+        self.assertEqual(df.loc[2, "station"].strip(), "CCC")
         self.assertEqual(df.loc[0, "Time_utc"], pd.Timestamp("2023-01-01T00:00:00Z"))
         self.assertEqual(df.loc[1, "Time_utc"], pd.Timestamp("2023-01-01T12:00:00Z"))
         self.assertEqual(df.loc[2, "Time_utc"], pd.Timestamp("2023-01-01T23:59:59Z"))
         # Row order preserved
-        self.assertEqual(list(df["Station"].str.strip()), ["STA", "BBB", "CCC"])
+        self.assertEqual(list(df["station"].str.strip()), ["STA", "BBB", "CCC"])
 
     def test_blank_numeric_field(self):
         # Hs_m field blank (spaces). Other fields valid.

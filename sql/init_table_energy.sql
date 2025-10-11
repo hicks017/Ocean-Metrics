@@ -20,5 +20,6 @@ CREATE TABLE IF NOT EXISTS energy (
     band_8_6s_cm2 REAL,
     band_8_6s_dir REAL,
     band_6_2s_cm2 REAL,
-    band_6_2s_dir REAL
+    band_6_2s_dir REAL,
+    UNIQUE(Date_utc, Station)
 );

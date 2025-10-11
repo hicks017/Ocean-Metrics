@@ -4,5 +4,6 @@ CREATE TABLE IF NOT EXISTS wind (
     Date_utc TEXT NOT NULL,
     Time_utc TEXT NOT NULL,
     Wspd_m_s REAL,
-    Wdir_deg REAL
+    Wdir_deg REAL,
+    UNIQUE(Date_utc, Station)
 );
