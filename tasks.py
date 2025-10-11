@@ -2,7 +2,7 @@ import logging
 from src.fetch_data import fetch_pre_text, build_url
 from src.parse_table import parse_cdip_pre_mp, parse_cdip_pre_te, parse_cdip_pre_9c, parse_cdip_jdar_wind
 from src.storage import get_connection
-from src.config import STATIONS
+from src.config import STATIONS, USE_POSTGRES
 
 logger = logging.getLogger(__name__)
 
@@ -28,8 +28,9 @@ def fetch_parse_store(station, table, parse_function, table_name, justdar: bool 
         # Check for duplicates before inserting
         with get_connection() as conn:
             try:
+                placeholder = '%s' if USE_POSTGRES else '?'
                 existing_records = conn.execute(
-                    f"SELECT COUNT(*) FROM {table_name} WHERE Date_utc = ? AND station = ?",
+                    f"SELECT COUNT(*) FROM {table_name} WHERE Date_utc = {placeholder} AND station = {placeholder}",
                     (df['Date_utc'].iloc[0], station)
                 ).fetchone()[0]
 
