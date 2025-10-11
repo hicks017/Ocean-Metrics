@@ -6,12 +6,12 @@ from src.config import STATIONS
 
 logger = logging.getLogger(__name__)
 
-def fetch_parse_store(station, table, parse_function, table_name, justdar: bool = False):
+def fetch_parse_store(station, table, parse_function, table_name, justdar: bool = False, timeout: int = 10):
     """Fetch data from URL, validate it, and store it in the database."""
     try:
         url = build_url(station, table, justdar=justdar)
         logger.info(f"Fetching data for {table_name} (station {station})...")
-        pre_text = fetch_pre_text(url)
+        pre_text = fetch_pre_text(url, timeout=timeout)
         logger.info(f"Parsing data for {table_name} (station {station})...")
         df = parse_function(pre_text)
 
@@ -48,7 +48,7 @@ def fetch_parse_store(station, table, parse_function, table_name, justdar: bool 
 
 def task_fetch_wind():
     for station in STATIONS["wind"]:
-        fetch_parse_store(station, "pm", parse_cdip_jdar_wind, "wind", justdar=True)
+        fetch_parse_store(station, "pm", parse_cdip_jdar_wind, "wind", justdar=True, timeout=30)
 
 def task_fetch_swell():
     for station in STATIONS["swell"]:
