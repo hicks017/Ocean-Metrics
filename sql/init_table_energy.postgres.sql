@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS energy (
     id SERIAL PRIMARY KEY,
     station INTEGER NOT NULL,
     date_utc DATE NOT NULL,
-    time_utc TIMESTAMPZ NOT NULL,
+    time_utc TIMESTAMPTZ NOT NULL,
     band_22s_plus_cm2 DOUBLE PRECISION,
     band_22s_plus_dir DOUBLE PRECISION,
     band_22_18s_cm2 DOUBLE PRECISION,

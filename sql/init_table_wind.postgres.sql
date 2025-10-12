@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS wind (
     id SERIAL PRIMARY KEY,
     station INTEGER NOT NULL,
     date_utc DATE NOT NULL,
-    time_utc TIMESTAMPZ NOT NULL,
+    time_utc TIMESTAMPTZ NOT NULL,
     wspd_m_s DOUBLE PRECISION,
     wdir_deg DOUBLE PRECISION
 );
