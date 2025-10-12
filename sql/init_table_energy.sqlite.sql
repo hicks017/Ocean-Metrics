@@ -1,8 +1,8 @@
 CREATE TABLE IF NOT EXISTS energy (
-    id {id_def},
-    Station INTEGER NOT NULL,
-    Date_utc TEXT NOT NULL,
-    Time_utc TEXT NOT NULL,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    station INTEGER NOT NULL,
+    date_utc TEXT NOT NULL,
+    time_utc TEXT NOT NULL,
     band_22s_plus_cm2 REAL,
     band_22s_plus_dir REAL,
     band_22_18s_cm2 REAL,
@@ -20,6 +20,5 @@ CREATE TABLE IF NOT EXISTS energy (
     band_8_6s_cm2 REAL,
     band_8_6s_dir REAL,
     band_6_2s_cm2 REAL,
-    band_6_2s_dir REAL,
-    UNIQUE(Date_utc, Station)
+    band_6_2s_dir REAL
 );

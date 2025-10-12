@@ -1,0 +1,10 @@
+CREATE TABLE IF NOT EXISTS swell (
+    id SERIAL PRIMARY KEY,
+    station INTEGER NOT NULL,
+    date_utc DATE NOT NULL,
+    time_utc TIMESTAMPZ NOT NULL,
+    hs_m DOUBLE PRECISION,
+    tp_s DOUBLE PRECISION,
+    dp_deg DOUBLE PRECISION,
+    ta_s DOUBLE PRECISION
+);

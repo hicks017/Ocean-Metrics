@@ -6,13 +6,13 @@ from src.parse_table import parse_cdip_jdar_wind
 class TestParseCdipJdarWind(unittest.TestCase):
     def setUp(self):
         # Column names expected from the function
-        self.expected_cols = ["station", "Date_utc", "Time_utc", "Wspd_m_s", "Wdir_deg"]
+        self.expected_cols = ["station", "date_utc", "time_utc", "wspd_m_s", "wdir_deg"]
 
     def test_single_valid_row_with_headers(self):
         # Input data with headers and a single valid row
         station = "123"
-        headers = "YEAR MO DY HR MN Hs_m Tp_sec Dp_deg Depth_m Ta_sec Pres_mB Wspd_m_s Wdir_deg TempAir_C TempSea_C"
-        header_descriptions = "      UTC           m   sec  deg     m     sec    mB     m/s  deg Air(C) Sfc(C) Mid(C) Bot(C)"
+        headers = "year mo dy hr mn hs_m tp_sec dp_deg depth_m ta_sec pres_mb wspd_m_s wdir_deg tempair_c tempsea_c"
+        header_descriptions = "      utc           m   sec  deg     m     sec    mb     m/s  deg air(c) sfc(c) mid(c) bot(c)"
         data_row = "2025 10 09 01 45  0.52  9.14         4.62  5.39          2.71 323              "
         input_text = f"{station} {headers}\n{header_descriptions}\n{data_row} "
 
@@ -26,16 +26,16 @@ class TestParseCdipJdarWind(unittest.TestCase):
         self.assertEqual(df.loc[0, "station"], int(station))
 
         # Time parsing: timezone-aware UTC Timestamp and correct value
-        ts = df.loc[0, "Time_utc"]
-        # self.assertTrue(pd.api.types.is_datetime64_any_dtype(df["Time_utc"]))
-        # self.assertEqual(ts, pd.Timestamp("2025-10-09T01:45:00Z"))
+        ts = df.loc[0, "time_utc"]
+        self.assertTrue(pd.api.types.is_datetime64_any_dtype(df["time_utc"]))
+        self.assertEqual(ts, pd.Timestamp("2025-10-09T01:45:00Z"))
 
-        # Date_utc equals date part
-        # self.assertEqual(df.loc[0, "Date_utc"], date(2025, 10, 9))
+        # date_utc equals date part
+        self.assertEqual(df.loc[0, "date_utc"], date(2025, 10, 9))
 
         # Wind speed and direction
-        self.assertAlmostEqual(df.loc[0, "Wspd_m_s"], 2.71)
-        self.assertEqual(df.loc[0, "Wdir_deg"], 323)
+        self.assertAlmostEqual(df.loc[0, "wspd_m_s"], 2.71)
+        self.assertEqual(df.loc[0, "wdir_deg"], 323)
 
     def test_empty_input(self):
         # Empty string should produce an empty DataFrame with the expected columns

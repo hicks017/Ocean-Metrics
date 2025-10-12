@@ -6,8 +6,8 @@ from src.fetch_data import fetch_pre_text
 
 class TestFetchPreText(unittest.TestCase):
     def setUp(self):
-        # URL with station “ABC” (between '?' and first '+')
-        self.url = "http://example.com/data?ABC+rest"
+        # URL with station “123” (between '?' and first '+')
+        self.url = "http://example.com/data?123+rest"
         self.user_agent = (
             "python-requests/table_download "
             "(+https://github.com/hicks017/Ocean-Metrics)"
@@ -29,7 +29,7 @@ class TestFetchPreText(unittest.TestCase):
 
         result = fetch_pre_text(self.url)
         # Should prefix station and pick only the first <pre> text
-        self.assertEqual(result, "ABC first line")
+        self.assertEqual(result, "123 first line")
 
     @patch("src.fetch_data.requests.get")
     def test_missing_pre_block_raises_runtime_error(self, mock_get):

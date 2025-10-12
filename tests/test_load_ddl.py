@@ -10,7 +10,7 @@ class TestLoadDDL(unittest.TestCase):
     @patch("pathlib.Path.read_text", return_value="CREATE TABLE mock_table (id INTEGER PRIMARY KEY);")
     def test_load_ddl_success(self, mock_read_text, mock_exists):
         table_name = "mock_table"
-        ddl = load_ddl(table_name)
+        ddl = load_ddl(table_name, dialect="sqlite")
 
         # Assert the correct file path was checked
         mock_exists.assert_called_once_with()
@@ -25,12 +25,12 @@ class TestLoadDDL(unittest.TestCase):
         table_name = "nonexistent_table"
 
         with self.assertRaises(FileNotFoundError) as context:
-            load_ddl(table_name)
+            load_ddl(table_name, dialect="sqlite")
 
         # Assert the correct file path was checked
         mock_exists.assert_called_once_with()
         # Assert the exception message matches
-        self.assertEqual(str(context.exception), "DDL not found: /mock/root/sql/init_table_nonexistent_table.sql")
+        self.assertEqual(str(context.exception), "DDL not found: /mock/root/sql/init_table_nonexistent_table.sqlite.sql")
 
 if __name__ == "__main__":
     unittest.main()

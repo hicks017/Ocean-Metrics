@@ -13,30 +13,29 @@ def parse_cdip_pre_mp(pre_text: str) -> pd.DataFrame:
 
     # Use fixed-width format to ensure proper column alignment
     col_specs = [
-        (0, 3),   # Station
-        (4, 18),  # Time_utc
-        (20, 24), # Hs_m
-        (25, 30), # Tp_s
-        (31, 34), # Dp_deg
-        (35, 40), # Ta_s
+        (0, 3),   # station
+        (4, 18),  # time_utc
+        (20, 24), # hs_m
+        (25, 30), # tp_s
+        (31, 34), # dp_deg
+        (35, 40), # ta_s
     ]
-    col_names = ["station", "Time_utc", "Hs_m", "Tp_s", "Dp_deg", "Ta_s"]
+    col_names = ["station", "time_utc", "hs_m", "tp_s", "dp_deg", "ta_s"]
 
     # Format data frame
     buffer = StringIO(pre_text)
     df = pd.read_fwf(buffer, colspecs=col_specs, header=None, names=col_names)
 
     # Convert time stamp column
-    df['Time_utc'] = pd.to_datetime(
-        df['Time_utc'],
+    df['time_utc'] = pd.to_datetime(
+        df['time_utc'],
         format='%Y%m%d%H%M%S',
         utc=True,
         errors='coerce'
     )
 
     # Extract date from time stamp
-    df.insert(1, 'Date_utc', df['Time_utc'].dt.strftime('%Y-%m-%d'))
-    df['Time_utc'] = df['Time_utc'].dt.strftime('%Y-%m-%dT%H:%M:%SZ')
+    df.insert(1, 'date_utc', df['time_utc'].dt.date)
     return df
 
 def parse_cdip_pre_9c(pre_text: str) -> pd.DataFrame:
@@ -50,8 +49,8 @@ def parse_cdip_pre_9c(pre_text: str) -> pd.DataFrame:
         
     # Use fixed-width format to ensure proper column alignment
     col_specs = [
-        (0, 3),   # Station
-        (4, 16),  # Time_utc
+        (0, 3),   # station
+        (4, 16),  # time_utc
         (20, 23), # band_22s_plus_cm2
         (24, 27), # band_22s_plus_dir
         (31, 34), # band_22_18s_cm2
@@ -73,7 +72,7 @@ def parse_cdip_pre_9c(pre_text: str) -> pd.DataFrame:
     ]
     col_names = [
         "station",
-        "Time_utc",
+        "time_utc",
         "band_22s_plus_cm2",
         "band_22s_plus_dir",
         "band_22_18s_cm2",
@@ -99,16 +98,15 @@ def parse_cdip_pre_9c(pre_text: str) -> pd.DataFrame:
     df = pd.read_fwf(buffer, colspecs=col_specs, header=None, names=col_names)
 
     # Convert time stamp column
-    df['Time_utc'] = pd.to_datetime(
-        df['Time_utc'],
+    df['time_utc'] = pd.to_datetime(
+        df['time_utc'],
         format='%Y%m%d%H%M',
         utc=True,
         errors='coerce'
     )
 
     # Extract date from time stamp
-    df.insert(1, 'Date_utc', df['Time_utc'].dt.strftime('%Y-%m-%d'))
-    df['Time_utc'] = df['Time_utc'].dt.strftime('%Y-%m-%dT%H:%M:%SZ')
+    df.insert(1, 'date_utc', df['time_utc'].dt.date)
     return df
 
 def parse_cdip_pre_te(pre_text: str) -> pd.DataFrame:
@@ -122,28 +120,27 @@ def parse_cdip_pre_te(pre_text: str) -> pd.DataFrame:
 
     # Use fixed-width format to ensure proper column alignment
     col_specs = [
-        (0, 3),   # Station
-        (4, 18),  # Time_utc
-        (19, 24), # SST_C
-        (26, 31), # SST_F
+        (0, 3),   # station
+        (4, 18),  # time_utc
+        (19, 24), # sst_c
+        (26, 31), # sst_f
     ]
-    col_names = ["station", "Time_utc", "SST_C", "SST_F"]
+    col_names = ["station", "time_utc", "sst_c", "sst_f"]
 
     # Format data frame
     buffer = StringIO(pre_text)
     df = pd.read_fwf(buffer, colspecs=col_specs, header=None, names=col_names)
 
     # Convert time stamp column
-    df['Time_utc'] = pd.to_datetime(
-        df['Time_utc'],
+    df['time_utc'] = pd.to_datetime(
+        df['time_utc'],
         format='%Y%m%d%H%M%S',
         utc=True,
         errors='coerce'
     )
     
     # Extract date from time stamp
-    df.insert(1, 'Date_utc', df['Time_utc'].dt.strftime('%Y-%m-%d'))
-    df['Time_utc'] = df['Time_utc'].dt.strftime('%Y-%m-%dT%H:%M:%SZ')
+    df.insert(1, 'date_utc', df['time_utc'].dt.date)
     return df
 
 def parse_cdip_jdar_wind(pre_text: str) -> pd.DataFrame:
@@ -156,7 +153,7 @@ def parse_cdip_jdar_wind(pre_text: str) -> pd.DataFrame:
 
     # Handle empty input
     if not pre_text.strip():
-        return pd.DataFrame(columns=["station", "Date_utc", "Time_utc", "Wspd_m_s", "Wdir_deg"])
+        return pd.DataFrame(columns=["station", "date_utc", "time_utc", "wspd_m_s", "wdir_deg"])
 
     # Capture station ID
     STATION = int(pre_text.split()[0])
@@ -177,16 +174,16 @@ def parse_cdip_jdar_wind(pre_text: str) -> pd.DataFrame:
 
     # Use fixed-width format to ensure proper column alignment
     col_specs = [
-        (0, 4), (5, 7), (8, 10), (11, 13), (14, 16),  # YEAR, MO, DY, HR, MN
-        (18, 22), (24, 28), (29, 32), (35, 40), (43, 47),  # Hs_m, Tp_sec, Dp_deg, Depth_m, Ta_sec
-        (47, 57), (57, 61), (62, 65), (65, 74), (74, 78)   # Pres_mB, Wspd_m_s, Wdir_deg, TempAir_C, TempSea_C
+        (0, 4), (5, 7), (8, 10), (11, 13), (14, 16),  # year, mo, dy, hr, mn
+        (18, 22), (24, 28), (29, 32), (35, 40), (43, 47),  # hs_m, tp_sec, dp_deg, depth_m, ta_sec
+        (47, 57), (57, 61), (62, 65), (65, 74), (74, 78)   # pres_mb, wspd_m_s, wdir_deg, tempair_c, tempsea_c
     ]
 
     col_names = [
-        "YEAR", "MO", "DY", "HR", "MN",
-        "Hs_m", "Tp_sec", "Dp_deg", "Depth_m", "Ta_sec",
-        "Pres_mB", "Wspd_m_s", "Wdir_deg",
-        "TempAir_C", "TempSea_C"
+        "year", "mo", "dy", "hr", "mn",
+        "hs_m", "tp_sec", "dp_deg", "depth_m", "ta_sec",
+        "pres_mb", "wspd_m_s", "wdir_deg",
+        "tempair_c", "tempsea_c"
     ]
 
     df = pd.read_fwf(buffer, colspecs=col_specs, header=None, names=col_names)
@@ -195,26 +192,26 @@ def parse_cdip_jdar_wind(pre_text: str) -> pd.DataFrame:
     df = df.apply(pd.to_numeric, errors='coerce')
 
     # Create a single datetime column
-    df['Time_utc'] = pd.to_datetime(
+    df['time_utc'] = pd.to_datetime(
         {
-            'year':   df['YEAR'],
-            'month':  df['MO'],
-            'day':    df['DY'],
-            'hour':   df['HR'],
-            'minute': df['MN']
+            'year':   df['year'],
+            'month':  df['mo'],
+            'day':    df['dy'],
+            'hour':   df['hr'],
+            'minute': df['mn']
         },
-        utc=True
+        utc=True,
+        errors='coerce'
     )
     
     # Extract date from time stamp
-    df.insert(1, 'Date_utc', df['Time_utc'].dt.strftime('%Y-%m-%d'))
-    df['Time_utc'] = df['Time_utc'].dt.strftime('%Y-%m-%dT%H:%M:%SZ')
+    df.insert(1, 'date_utc', df['time_utc'].dt.date)
 
     # Create column to indicate station
     df['station'] = STATION
 
     # Select columns
-    df = df[['station', 'Date_utc', 'Time_utc', 'Wspd_m_s', 'Wdir_deg']]
+    df = df[['station', 'date_utc', 'time_utc', 'wspd_m_s', 'wdir_deg']]
 
     # Return the latest record
     return df.tail(1)

@@ -8,7 +8,7 @@ class TestParseCdipPre9c(unittest.TestCase):
     def setUp(self):
         # Column names expected from the function
         self.expected_cols = [
-            "station", "Date_utc", "Time_utc", "band_22s_plus_cm2", "band_22s_plus_dir",
+            "station", "date_utc", "time_utc", "band_22s_plus_cm2", "band_22s_plus_dir",
             "band_22_18s_cm2", "band_22_18s_dir", "band_18_16s_cm2", "band_18_16s_dir",
             "band_16_14s_cm2", "band_16_14s_dir", "band_14_12s_cm2", "band_14_12s_dir",
             "band_12_10s_cm2", "band_12_10s_dir", "band_10_8s_cm2", "band_10_8s_dir",
@@ -17,7 +17,7 @@ class TestParseCdipPre9c(unittest.TestCase):
 
     def test_single_valid_row(self):
         # Build a single line with fixed-width columns per col_specs in function
-        station = "ABC"
+        station = 123
         time_str = "202401011230"  # 2024-01-01 12:30 UTC
         bands = ["123", "045", "234", "067", "345", "089", "456", "123", "567", "234", "678", "345", "789", "456", "890", "567", "901", "678", "012", "789"]
         # Construct line by placing spaces to match the column indices used by read_fwf
@@ -53,15 +53,15 @@ class TestParseCdipPre9c(unittest.TestCase):
         self.assertEqual(len(df), 1)
 
         # Station exact match
-        self.assertEqual(df.loc[0, "station"].strip(), station)
+        self.assertEqual(df.loc[0, "station"], station)
 
         # Time parsing: timezone-aware UTC Timestamp and correct value
-        # ts = df.loc[0, "Time_utc"]
-        # self.assertTrue(pd.api.types.is_datetime64_any_dtype(df["Time_utc"]))
-        # self.assertEqual(ts, pd.Timestamp("2024-01-01T12:30:00Z"))
+        ts = df.loc[0, "time_utc"]
+        self.assertTrue(pd.api.types.is_datetime64_any_dtype(df["time_utc"]))
+        self.assertEqual(ts, pd.Timestamp("2024-01-01T12:30:00Z"))
 
-        # Date_utc equals date part
-        # self.assertEqual(df.loc[0, "Date_utc"], date(2024, 1, 1))
+        # date_utc equals date part
+        self.assertEqual(df.loc[0, "date_utc"], date(2024, 1, 1))
 
         # Numeric-like fields preserved as strings/objects by read_fwf; verify their trimmed contents
         for i, col in enumerate(self.expected_cols[3:]):
