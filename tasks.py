@@ -2,6 +2,7 @@ import logging
 from sqlalchemy import MetaData, Table, select, func, and_
 from src.fetch_data import fetch_pre_text, build_url
 from src.parse_table import parse_cdip_pre_mp, parse_cdip_pre_te, parse_cdip_pre_9c, parse_cdip_jdar_wind
+from src.db_utils import prepare_df_for_db, scalar_for_db
 from src.storage import get_connection
 from src.config import STATIONS, USE_POSTGRES
 
@@ -35,15 +36,19 @@ def fetch_parse_store(station, table, parse_function, table_name, justdar: bool 
         engine = get_connection()
         metadata = MetaData()
 
+        df = prepare_df_for_db(df, engine)
+
         # Reflect only the target table to avoid reflecting whole DB
         table_obj = Table(table_name, metadata, autoload_with=engine)
 
         # Check for an existing row using SQLAlchemy Core
+        row_date = scalar_for_db(df["date_utc"].iloc[0], engine, kind ="date")
+        row_station = int(df["station"].iloc[0])
         count_expr = func.count()
         check_stmt = select(count_expr).select_from(table_obj).where(
             and_(
-                table_obj.c.Date_utc == df['date_utc'].iloc[0],
-                table_obj.c.station == station
+                table_obj.c.time_utc == row_date,
+                table_obj.c.station == row_station
             )
         )
 
@@ -55,7 +60,7 @@ def fetch_parse_store(station, table, parse_function, table_name, justdar: bool 
                     return
 
                 logger.info(f"Storing data for {table_name} (station {station})...")
-                # Use pandas to_sql to append rows; to_sql will use SQLAlchemy engine properly
+                # Use pandas to_sql to append rows
                 df.to_sql(table_name, engine, if_exists="append", index=False)
         except Exception as db_error:
             logger.error(f"❌ Database error while processing {table_name} (station {station}): {db_error}")

@@ -63,7 +63,7 @@ def fetch_parse_store(station, table, parse_function, table_name):
             return
 
         # Validate parsed data
-        required_columns = ["Date_utc", "station"]
+        required_columns = ["date_utc", "station"]
         if not all(col in df.columns for col in required_columns):
             logger.error(f"Validation failed: Missing required columns in parsed data for {table_name} (station {station}).")
             return
@@ -72,8 +72,8 @@ def fetch_parse_store(station, table, parse_function, table_name):
         with get_connection() as conn:
             try:
                 existing_records = conn.execute(
-                    f"SELECT COUNT(*) FROM {table_name} WHERE Date_utc = ? AND station = ?",
-                    (df['Date_utc'].iloc[0], station)
+                    f"SELECT COUNT(*) FROM {table_name} WHERE date_utc = ? AND station = ?",
+                    (df['date_utc'].iloc[0], station)
                 ).fetchone()[0]
 
                 if existing_records > 0:
@@ -110,7 +110,7 @@ class TestFetchParseStore(unittest.TestCase):
             conn.execute(
                 """
                 CREATE TABLE test_table (
-                    Date_utc TEXT,
+                    date_utc TEXT,
                     station TEXT,
                     value REAL
                 )
@@ -134,20 +134,20 @@ class TestFetchParseStore(unittest.TestCase):
     def test_successful_insert(self):
         # Parse_function returns a valid non-empty DataFrame
         def parse_fn(pre_text):
-            return pd.DataFrame([{"Date_utc": "2025-10-09T00:00:00Z", "station": "100", "value": 1.23}])
+            return pd.DataFrame([{"date_utc": "2025-10-09", "station": "100", "value": 1.23}])
 
         fetch_parse_store("100", "t", parse_fn, "test_table")
 
         # Verify record inserted
         with sqlite3.connect(self.db_path) as conn:
-            count = conn.execute("SELECT COUNT(*) FROM test_table WHERE Date_utc = ? AND station = ?", ("2025-10-09T00:00:00Z", "100")).fetchone()[0]
+            count = conn.execute("SELECT COUNT(*) FROM test_table WHERE date_utc = ? AND station = ?", ("2025-10-09", "100")).fetchone()[0]
         self.assertEqual(count, 1)
         # Logger recorded success messages
         self.assertTrue(any("Successfully processed test_table (station 100)." in m for m in logger.infos))
 
     def test_empty_dataframe_no_insert(self):
         def parse_fn(pre_text):
-            return pd.DataFrame(columns=["Date_utc", "station", "value"])  # empty
+            return pd.DataFrame(columns=["date_utc", "station", "value"])  # empty
 
         fetch_parse_store("100", "t", parse_fn, "test_table")
 
@@ -159,30 +159,30 @@ class TestFetchParseStore(unittest.TestCase):
     def test_missing_required_columns(self):
         # Missing "station" column
         def parse_fn(pre_text):
-            return pd.DataFrame([{"Date_utc": "2025-10-09T00:00:00Z", "value": 2.34}])
+            return pd.DataFrame([{"date_utc": "2025-10-09", "value": 2.34}])
 
         fetch_parse_store("100", "t", parse_fn, "test_table")
 
         with sqlite3.connect(self.db_path) as conn:
-            count = conn.execute("SELECT COUNT(*) FROM test_table WHERE Date_utc = ?", ("2025-10-09T00:00:00Z",)).fetchone()[0]
+            count = conn.execute("SELECT COUNT(*) FROM test_table WHERE date_utc = ?", ("2025-10-09",)).fetchone()[0]
         self.assertEqual(count, 0)
         self.assertTrue(any("Validation failed: Missing required columns" in m for m in logger.errors))
 
     def test_skip_duplicate(self):
         # Insert an initial record
         with sqlite3.connect(self.db_path) as conn:
-            conn.execute("INSERT INTO test_table (Date_utc, station, value) VALUES (?, ?, ?)",
-                         ("2025-10-09T00:00:00Z", "100", 9.99))
+            conn.execute("INSERT INTO test_table (date_utc, station, value) VALUES (?, ?, ?)",
+                         ("2025-10-09", "100", 9.99))
             conn.commit()
 
         def parse_fn(pre_text):
-            return pd.DataFrame([{"Date_utc": "2025-10-09T00:00:00Z", "station": "100", "value": 9.99}])
+            return pd.DataFrame([{"date_utc": "2025-10-09", "station": "100", "value": 9.99}])
 
         fetch_parse_store("100", "t", parse_fn, "test_table")
 
         with sqlite3.connect(self.db_path) as conn:
-            count = conn.execute("SELECT COUNT(*) FROM test_table WHERE Date_utc = ? AND station = ?",
-                                 ("2025-10-09T00:00:00Z", "100")).fetchone()[0]
+            count = conn.execute("SELECT COUNT(*) FROM test_table WHERE date_utc = ? AND station = ?",
+                                 ("2025-10-09", "100")).fetchone()[0]
         # Should remain 1 (no duplicate inserted)
         self.assertEqual(count, 1)
         self.assertTrue(any("Skipping duplicate entry" in m for m in logger.infos))
@@ -194,7 +194,7 @@ class TestFetchParseStore(unittest.TestCase):
             conn.execute(
                 """
                 CREATE TABLE bad_table (
-                    Date_utc TEXT NOT NULL,
+                    date_utc TEXT NOT NULL,
                     station TEXT NOT NULL,
                     value REAL NOT NULL
                 )
@@ -205,7 +205,7 @@ class TestFetchParseStore(unittest.TestCase):
 
         # Produce a row missing 'value' to violate NOT NULL
         def parse_fn(pre_text):
-            return pd.DataFrame([{"Date_utc": "2025-10-09T00:00:00Z", "station": "100"}])
+            return pd.DataFrame([{"date_utc": "2025-10-09", "station": "100"}])
 
         # Patch the connection object returned by get_connection
         with mock.patch("sqlite3.connect") as mock_connect:

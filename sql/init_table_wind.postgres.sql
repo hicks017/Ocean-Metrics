@@ -3,6 +3,6 @@ CREATE TABLE IF NOT EXISTS wind (
     station INTEGER NOT NULL,
     date_utc DATE NOT NULL,
     time_utc TIMESTAMPZ NOT NULL,
-    wspd_m_s REAL,
-    wdir_deg REAL
+    wspd_m_s DOUBLE PRECISION,
+    wdir_deg DOUBLE PRECISION
 );

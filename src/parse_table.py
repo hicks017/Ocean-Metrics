@@ -192,7 +192,7 @@ def parse_cdip_jdar_wind(pre_text: str) -> pd.DataFrame:
     df = df.apply(pd.to_numeric, errors='coerce')
 
     # Create a single datetime column
-    df['Time_utc'] = pd.to_datetime(
+    df['time_utc'] = pd.to_datetime(
         {
             'year':   df['year'],
             'month':  df['mo'],

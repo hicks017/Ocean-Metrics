@@ -63,14 +63,4 @@ def init_db(engine: Engine):
                 except Exception as e:
                     logging.error(f"❌ Error creating index {idx}: {e}")
 
-# def main():
-#     """
-#     Entry point: open connection, init schema, auto-close.
-#     """
-#     with get_connection() as conn:
-#         init_db(conn)
-
-# if __name__ == "__main__":
-#     main()
-
 # Created with AI assistance

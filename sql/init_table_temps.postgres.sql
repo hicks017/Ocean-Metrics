@@ -3,6 +3,6 @@ CREATE TABLE IF NOT EXISTS temps (
     station INTEGER NOT NULL,
     date_utc DATE NOT NULL,
     time_utc TIMESTAMPZ NOT NULL,
-    sst_c REAL,
-    sst_f REAL
+    sst_c DOUBLE PRECISION,
+    sst_f DOUBLE PRECISION
 );

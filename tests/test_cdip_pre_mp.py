@@ -8,13 +8,13 @@ from src.parse_table import parse_cdip_pre_mp
 class TestParseCdipPreMp(unittest.TestCase):
     def setUp(self):
         # Column names expected from the function
-        self.expected_cols = ["station", "Date_utc", "Time_utc", "Hs_m", "Tp_s", "Dp_deg", "Ta_s"]
+        self.expected_cols = ["station", "date_utc", "time_utc", "hs_m", "tp_s", "dp_deg", "ta_s"]
 
     def test_single_valid_row(self):
         # Build a single line with fixed-width columns per col_specs in function:
-        # (0,3)=station, (4,18)=Time_utc (YYYYmmddHHMMSS), (21,25)=Hs_m, (25,30)=Tp_s,
+        # (0,3)=station, (4,18)=time_utc (YYYYmmddHHMMSS), (21,25)=Hs_m, (25,30)=Tp_s,
         # (31,34)=Dp_deg, (36,40)=Ta_s
-        station = "ABC"
+        station = 123
         time_str = "20240101123045"  # 2024-01-01 12:30:45 UTC
         hs = "1.11"    # occupies cols 21-24 (4 chars in snippet)
         tp = "22.22"    # occupies cols 25-29 (5 chars)
@@ -43,27 +43,27 @@ class TestParseCdipPreMp(unittest.TestCase):
         self.assertEqual(len(df), 1)
 
         # Station exact match
-        self.assertEqual(df.loc[0, "station"].strip(), station)
+        self.assertEqual(df.loc[0, "station"], station)
 
         # Time parsing: timezone-aware UTC Timestamp and correct value
-        # ts = df.loc[0, "Time_utc"]
-        # self.assertTrue(pd.api.types.is_datetime64_any_dtype(df["Time_utc"]))
+        # ts = df.loc[0, "time_utc"]
+        # self.assertTrue(pd.api.types.is_datetime64_any_dtype(df["time_utc"]))
         # self.assertEqual(ts.tzinfo.zone if hasattr(ts.tzinfo, "zone") else ts.tz, pd.Timestamp("2024-01-01T12:30:45Z").tzinfo if hasattr(pd.Timestamp("2024-01-01T12:30:45Z"), "tzinfo") else None)
         # self.assertEqual(ts, pd.Timestamp("2024-01-01T12:30:45Z"))
 
-        # Date_utc equals date part
-        # self.assertEqual(df.loc[0, "Date_utc"], date(2024, 1, 1))
+        # date_utc equals date part
+        # self.assertEqual(df.loc[0, "date_utc"], date(2024, 1, 1))
 
         # Numeric-like fields preserved as strings/objects by read_fwf; verify their trimmed contents
-        self.assertEqual(str(df.loc[0, "Hs_m"]).strip(), hs.strip())
-        self.assertEqual(float(df.loc[0, "Tp_s"]), float(tp.strip()))
-        self.assertEqual(str(df.loc[0, "Dp_deg"]).strip(), dp.strip())
-        self.assertEqual(float(df.loc[0, "Ta_s"]), float(ta.strip()))
+        self.assertEqual(str(df.loc[0, "hs_m"]).strip(), hs.strip())
+        self.assertEqual(float(df.loc[0, "tp_s"]), float(tp.strip()))
+        self.assertEqual(str(df.loc[0, "dp_deg"]).strip(), dp.strip())
+        self.assertEqual(float(df.loc[0, "ta_s"]), float(ta.strip()))
 
     def test_multiple_valid_rows(self):
         # Create three lines with different station and timestamps
         lines = []
-        for i, (st, tstr) in enumerate([("STA", "20230101000000"), ("BBB", "20230101120000"), ("CCC", "20230101235959")]):
+        for i, (st, tstr) in enumerate([(123, "20230101000000"), (456, "20230101120000"), (789, "20230101235959")]):
             hs = f"{0.5 + i:.2f}".rjust(4)   # keep width similar
             tp = f"{3.0 + i:.2f}".ljust(5)
             dp = f"{30 + i}"
@@ -87,18 +87,18 @@ class TestParseCdipPreMp(unittest.TestCase):
         self.assertListEqual(list(df.columns), self.expected_cols)
         self.assertEqual(len(df), 3)
         # Check first, middle, last timestamps and station values
-        self.assertEqual(df.loc[0, "station"].strip(), "STA")
-        self.assertEqual(df.loc[1, "station"].strip(), "BBB")
-        self.assertEqual(df.loc[2, "station"].strip(), "CCC")
-        self.assertEqual(df.loc[0, "Time_utc"], pd.Timestamp("2023-01-01T00:00:00Z"))
-        self.assertEqual(df.loc[1, "Time_utc"], pd.Timestamp("2023-01-01T12:00:00Z"))
-        self.assertEqual(df.loc[2, "Time_utc"], pd.Timestamp("2023-01-01T23:59:59Z"))
+        self.assertEqual(df.loc[0, "station"], 123)
+        self.assertEqual(df.loc[1, "station"], 456)
+        self.assertEqual(df.loc[2, "station"], 789)
+        self.assertEqual(df.loc[0, "time_utc"], pd.Timestamp("2023-01-01T00:00:00Z"))
+        self.assertEqual(df.loc[1, "time_utc"], pd.Timestamp("2023-01-01T12:00:00Z"))
+        self.assertEqual(df.loc[2, "time_utc"], pd.Timestamp("2023-01-01T23:59:59Z"))
         # Row order preserved
-        self.assertEqual(list(df["station"].str.strip()), ["STA", "BBB", "CCC"])
+        self.assertEqual(list(df["station"]), [123, 456, 789])
 
     def test_blank_numeric_field(self):
         # Hs_m field blank (spaces). Other fields valid.
-        station = "ABC"
+        station = "123"
         time_str = "20240202101010"
         hs_blank = "    "   # spaces where Hs_m would be
         tp = "5.00"
@@ -126,7 +126,7 @@ class TestParseCdipPreMp(unittest.TestCase):
 
         # Hs_m should become NaN or an empty/whitespace string depending on pandas version;
         # check both possibilities robustly.
-        hs_val = df.loc[0, "Hs_m"]
+        hs_val = df.loc[0, "hs_m"]
         # Acceptable: NaN-like or string of whitespace/empty when stripped is empty
         if pd.isna(hs_val):
             pass
@@ -134,8 +134,8 @@ class TestParseCdipPreMp(unittest.TestCase):
             self.assertEqual(str(hs_val).strip(), "")
 
         # Other fields parsed as expected
-        self.assertEqual(float(df.loc[0, "Tp_s"]), float(tp.strip()))
-        self.assertEqual(str(df.loc[0, "Dp_deg"]).strip(), dp.strip('0'))
+        self.assertEqual(float(df.loc[0, "tp_s"]), float(tp.strip()))
+        self.assertEqual(str(df.loc[0, "dp_deg"]).strip(), dp.strip('0'))
 
     def test_empty_input(self):
         # Empty string should produce an empty DataFrame with the expected columns
