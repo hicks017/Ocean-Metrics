@@ -40,11 +40,11 @@ def scalar_for_db(val, engine: Engine, kind: str="date"):
             return ts.date().isoformat()
         else:
             return ts.date().to_pydatetime().date()
-    if kind in c("datetime", "timestamp", "ts"):
+    if kind in ("datetime", "timestamp", "ts"):
         ts = pd.to_datetime(val, utc=True, errors="coerce")
         if pd.isna(ts):
             return None
         if dname == "sqlite":
             return ts.dt.strftime("%Y-%m-%dT%H:%M:%SZ") if isinstance(ts, pd.Timestamp) else ts.isoformat()
         else:
-            return ts.time().to_pydatetime()
+            return ts.to_pydatetime()
