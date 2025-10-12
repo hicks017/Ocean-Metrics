@@ -39,7 +39,7 @@ def scalar_for_db(val, engine: Engine, kind: str="date"):
         if dname == "sqlite":
             return ts.date().isoformat()
         else:
-            return ts.date().to_pydatetime().date()
+            return ts.normalize().to_pydatetime().date()
     if kind in ("datetime", "timestamp", "ts"):
         ts = pd.to_datetime(val, utc=True, errors="coerce")
         if pd.isna(ts):
